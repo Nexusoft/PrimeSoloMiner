@@ -23,7 +23,7 @@ namespace Core
 				Sleep(1);
 				
 				/** Assure that this thread stays idle when waiting for new block, or share submission. **/
-				if(fNewBlock || fBlockWaiting || fBlockFound)
+				if(fNewBlock || fBlockWaiting)
 					continue;
 				
 				

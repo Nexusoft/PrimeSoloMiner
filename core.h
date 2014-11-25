@@ -207,7 +207,7 @@ namespace Core
 		CBlock cBlock;
 		unsigned int nDifficulty;
 		
-		bool fNewBlock, fBlockWaiting, fBlockFound;
+		bool fNewBlock, fBlockWaiting;
 		LLP::Thread_t THREAD;
 		boost::mutex MUTEX;
 		
