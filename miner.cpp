@@ -451,9 +451,9 @@ int main(int argc, char *argv[])
 
 	if(argc < 3)
 	{
-		printf("Too Few Arguments. The Required Arguments are 'IP PORT ADDRESS'\n");
+		printf("Too Few Arguments. The Required Arguments are 'IP PORT'\n");
 		printf("Default Arguments are Total Threads = CPU Cores and Connection Timeout = 10 Seconds\n");
-		printf("Format for Arguments is 'IP PORT ADDRESS THREADS TIMEOUT'\n");
+		printf("Format for Arguments is 'IP PORT THREADS TIMEOUT'\n");
 		
 		Sleep(10000);
 		
