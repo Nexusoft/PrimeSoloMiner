@@ -121,15 +121,18 @@ namespace Core
 							index += p;
 						}
 						
-						remainder = base_remainder + 12;
-						if (p<remainder)
-							remainder -= p;
-						r = (p - remainder) * inv;
-						index = r % p;
-						while(index < nBitArray_Size)
+						if(cBlock.nBits > 40000000)
 						{
-								bit_array_sieve[(index)>>3] |= (1<<((index)&7));
-							index += p;
+							remainder = base_remainder + 12;
+							if (p<remainder)
+								remainder -= p;
+							r = (p - remainder) * inv;
+							index = r % p;
+							while(index < nBitArray_Size)
+							{
+									bit_array_sieve[(index)>>3] |= (1<<((index)&7));
+								index += p;
+							}
 						}
 						
 						nSieves++;
@@ -194,9 +197,16 @@ namespace Core
 								continue;
 							
 							/** Check that the Prime Cluster is large enough. **/
-							unsigned int nBits = GetPrimeBits(cBlock.GetPrime(), 1);
+							std::vector<unsigned int> vPrimes;
+							unsigned int nBits = GetPrimeBits(cBlock.GetPrime(), 1, vPrimes);
 							if(nBits >= cBlock.nBits)
 							{
+								printf("[MASTER] Prime Cluster Found of Difficulty %f [", nBits / 10000000.0);
+								
+								for(int nIndex = 0; nIndex < vPrimes.size() - 1; nIndex++)
+									printf(" + %u,", vPrimes[nIndex]);
+									
+								printf(" + %u ]\n\n%s\n\n", vPrimes[vPrimes.size() - 1], cBlock.GetPrime().ToString().c_str());
 								cServerConnection->SubmitBlock(cBlock);
 
 								break;
@@ -346,8 +356,6 @@ namespace Core
 						CLIENT->GetBlock();
 						THREADS[nIndex]->fBlockWaiting = true;
 						THREADS[nIndex]->fNewBlock = false;
-						
-						printf("[MASTER] Asking For New Block for Thread %u\n", nIndex);
 					}
 				}
 					
@@ -370,7 +378,7 @@ namespace Core
 					RESPONSE_QUEUE.pop();
 					
 					nBlocks++;
-					printf("[MASTER] Prime Cluster Found | Difficulty %f | Hash %s  --> [Accepted]\n", GetPrimeDifficulty(cResponse.GetPrime(), 1), cResponse.GetHash().ToString().substr(0, 20).c_str());
+					printf("[MASTER] Block Accepted by Coinshield Network\n");
 				}
 					
 					
@@ -383,7 +391,7 @@ namespace Core
 					CBlock cResponse = RESPONSE_QUEUE.front();
 					RESPONSE_QUEUE.pop();
 					
-					printf("[MASTER] Prime Cluster Found | Difficulty %f | Hash %s  --> [Rejected]\n", GetPrimeDifficulty(cResponse.GetPrime(), 1), cResponse.GetHash().ToString().substr(0, 20).c_str());
+					printf("[MASTER] Block Rejected by Coinshield Network\n");
 				}
 					
 				/** Reset the Threads if a New Block came in. **/

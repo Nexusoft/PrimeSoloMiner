@@ -146,9 +146,9 @@ namespace Core
 	
 	void InitializePrimes();
 	unsigned int SetBits(double nDiff);
-	double GetPrimeDifficulty(CBigNum prime, int checks);
+	double GetPrimeDifficulty(CBigNum prime, int checks, std::vector<unsigned int>& vPrimes);
 	double GetSieveDifficulty(CBigNum next, unsigned int clusterSize);
-	unsigned int GetPrimeBits(CBigNum prime, int checks);
+	unsigned int GetPrimeBits(CBigNum prime, int checks, std::vector<unsigned int>& vPrimes);
 	unsigned int GetFractionalDifficulty(CBigNum composite);
 	std::vector<unsigned int> Eratosthenes(int nSieveSize);
 	bool DivisorCheck(CBigNum test);
