@@ -9,6 +9,9 @@ unsigned int nSieves = 0;
 unsigned int nBlocks = 0;
 
 
+unsigned int nDifficulty   = 0;
+
+
 namespace Core
 {
 
@@ -25,7 +28,6 @@ namespace Core
 				/** Assure that this thread stays idle when waiting for new block, or share submission. **/
 				if(fNewBlock || fBlockWaiting)
 					continue;
-				
 				
 				/** Lock the Thread at this Mutex when Changing Block Pointer. **/
 				MUTEX.lock();
@@ -121,18 +123,15 @@ namespace Core
 							index += p;
 						}
 						
-						if(cBlock.nBits > 40000000)
+						remainder = base_remainder + 12;
+						if (p<remainder)
+							remainder -= p;
+						r = (p - remainder) * inv;
+						index = r % p;
+						while(index < nBitArray_Size)
 						{
-							remainder = base_remainder + 12;
-							if (p<remainder)
-								remainder -= p;
-							r = (p - remainder) * inv;
-							index = r % p;
-							while(index < nBitArray_Size)
-							{
-									bit_array_sieve[(index)>>3] |= (1<<((index)&7));
-								index += p;
-							}
+							bit_array_sieve[(index)>>3] |= (1<<((index)&7));
+							index += p;
 						}
 						
 						nSieves++;
@@ -329,7 +328,7 @@ namespace Core
 					nPrimes = 0;
 					nChains = 0;
 					
-					printf("[METERS] %f PPS | %f CPS | %u Blocks | %f CSD per Hour | Height = %u | %02d:%02d:%02d\n", PPS, CPS, nBlocks, CSD, nBestHeight, (SecondsElapsed/3600)%60, (SecondsElapsed/60)%60, (SecondsElapsed)%60);
+					printf("[METERS] %f PPS | %f CPS | %u Blocks | %f CSD per Hour | Height = %u | Difficulty %f | %02d:%02d:%02d\n", PPS, CPS, nBlocks, CSD, nBestHeight, nDifficulty / 10000000.0, (SecondsElapsed/3600)%60, (SecondsElapsed/60)%60, (SecondsElapsed)%60);
 					METER_TIMER.Reset();	
 				}
 					
@@ -435,6 +434,9 @@ namespace Core
 									
 								break;
 							}
+							
+							/** Set the Difficulty from most recent Block Received. **/
+							nDifficulty = THREADS[nIndex]->cBlock.nBits;
 								
 							printf("[MASTER] Block %s Height = %u Received on Thread %u\n", THREADS[nIndex]->cBlock.GetHash().ToString().substr(0, 20).c_str(), THREADS[nIndex]->cBlock.nHeight, nIndex);
 							THREADS[nIndex]->fBlockWaiting = false;

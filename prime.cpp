@@ -180,24 +180,24 @@ namespace Core
 		
 		CBigNum lastPrime = prime;
 		CBigNum next = prime + 2;
-		unsigned int clusterSize = 1, nOffset = 2;
+		unsigned int clusterSize = 1, nOffset = 0;
 		
 		
 		///largest prime gap in cluster can be +12
 		///this was determined by previously found clusters up to 17 primes
-		vOffsets.push_back(0);
+		vOffsets.push_back(nOffset);
 		for( next ; next <= lastPrime + 12; next += 2)
 		{
+			nOffset += 2;
+			
 			if(PrimeCheck(next, checks))
 			{
 				lastPrime = next;
 				++clusterSize;
 				
 				vOffsets.push_back(nOffset);
-				nOffset = 2;
+				nOffset = 0;
 			}
-			
-			nOffset += 2;
 		}
 		
 		///calulate the rarety of cluster from proportion of fermat remainder of last prime + 2
