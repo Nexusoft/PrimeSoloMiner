@@ -1,0 +1,8 @@
+build/prime.o: prime.cpp core.h types.h util.h hash/templates.h \
+ hash/uint1024.h hash/skein.h hash/skein_port.h hash/brg_types.h \
+ hash/brg_endian.h hash/KeccakHash.h hash/KeccakSponge.h \
+ hash/KeccakF-1600-interface.h bignum.h
+prime.cpp core.h types.h util.h hash/templates.h :
+ hash/uint1024.h hash/skein.h hash/skein_port.h hash/brg_types.h :
+ hash/brg_endian.h hash/KeccakHash.h hash/KeccakSponge.h :
+ hash/KeccakF-1600-interface.h bignum.h :

@@ -1,0 +1,4 @@
+build/skein_block.o: hash/skein_block.cpp hash/skein.h hash/skein_port.h \
+ hash/brg_types.h hash/brg_endian.h
+hash/skein_block.cpp hash/skein.h hash/skein_port.h :
+ hash/brg_types.h hash/brg_endian.h :

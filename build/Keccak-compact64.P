@@ -1,0 +1,4 @@
+build/Keccak-compact64.o: hash/Keccak-compact64.c hash/brg_endian.h \
+ hash/KeccakF-1600-interface.h
+hash/Keccak-compact64.c hash/brg_endian.h :
+ hash/KeccakF-1600-interface.h :

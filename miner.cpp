@@ -182,7 +182,7 @@ namespace Core
 						}
 						
 
-						if(nPrimeCount >= 3)
+						if(nPrimeCount >= 2)
 						{	
 							/** Increment the Chain Counter if Cluster is above size 3. **/
 							nChains++;
@@ -192,8 +192,8 @@ namespace Core
 							cBlock.nNonce = mpz2uint64(zTempVar);
 							
 							/** Run Small Check from Sieve Before Costly Cluster Check. **/
-							if(SetBits(GetSieveDifficulty(cBlock.GetPrime() + nLastOffset, nPrimeCount)) < cBlock.nBits)
-								continue;
+							//if(SetBits(GetSieveDifficulty(cBlock.GetPrime() + nLastOffset, nPrimeCount)) < cBlock.nBits)
+							//	continue;
 							
 							/** Check that the Prime Cluster is large enough. **/
 							std::vector<unsigned int> vPrimes;
@@ -237,14 +237,6 @@ namespace Core
 	/** Reset the block on each of the Threads. **/
 	void ServerConnection::ResetThreads()
 	{
-		/** Clear the Submit Queue. **/
-		SUBMIT_MUTEX.lock();
-		
-		while(!SUBMIT_QUEUE.empty())
-			SUBMIT_QUEUE.pop();
-			
-		SUBMIT_MUTEX.unlock();
-
 		
 		/** Reset each individual flag to tell threads to stop mining. **/
 		for(int nIndex = 0; nIndex < THREADS.size(); nIndex++)
@@ -261,9 +253,7 @@ namespace Core
 	/** Add a Block to the Submit Queue. **/
 	void ServerConnection::SubmitBlock(CBlock cBlock)
 	{
-		SUBMIT_MUTEX.lock();
-		SUBMIT_QUEUE.push(cBlock);
-		SUBMIT_MUTEX.unlock();
+		CLIENT->SubmitBlock(cBlock.hashMerkleRoot, cBlock.nNonce);
 	}
 	
 		
@@ -328,22 +318,11 @@ namespace Core
 					nPrimes = 0;
 					nChains = 0;
 					
-					printf("[METERS] %f PPS | %f CPS | %u Blocks | %f CSD per Hour | Height = %u | Difficulty %f | %02d:%02d:%02d\n", PPS, CPS, nBlocks, CSD, nBestHeight, nDifficulty / 10000000.0, (SecondsElapsed/3600)%60, (SecondsElapsed/60)%60, (SecondsElapsed)%60);
+					printf("[METERS] %f PPS | %f CPS | %u Blocks | %f NXS per Hour | Height = %u | Difficulty %f | %02d:%02d:%02d\n", PPS, CPS, nBlocks, CSD, nBestHeight, nDifficulty / 10000000.0, (SecondsElapsed/3600)%60, (SecondsElapsed/60)%60, (SecondsElapsed)%60);
 					METER_TIMER.Reset();	
+					
+					ResetThreads();
 				}
-					
-					
-				/** Submit any Shares from the Mining Threads. **/
-				SUBMIT_MUTEX.lock();
-				while(SUBMIT_QUEUE.size() > 0)
-				{
-					CBlock cBlock = SUBMIT_QUEUE.front();
-					SUBMIT_QUEUE.pop();
-					
-					CLIENT->SubmitBlock(cBlock.hashMerkleRoot, cBlock.nNonce);
-					RESPONSE_QUEUE.push(cBlock);
-				}
-				SUBMIT_MUTEX.unlock();
 				
 				
 				/** Check if there is work to do for each Miner Thread. **/
@@ -370,27 +349,19 @@ namespace Core
 				/** Output if a Share is Accepted. **/
 				if(PACKET.HEADER == CLIENT->GOOD)
 				{
-					if(RESPONSE_QUEUE.empty())
-						continue;
-						
-					CBlock cResponse = RESPONSE_QUEUE.front();
-					RESPONSE_QUEUE.pop();
-					
 					nBlocks++;
-					printf("[MASTER] Block Accepted by Coinshield Network\n");
+					printf("[MASTER] Nexus : Block ACCEPTED\n");
+					
+					ResetThreads();
 				}
 					
 					
 				/** Output if a Share is Rejected. **/
 				else if(PACKET.HEADER == CLIENT->FAIL) 
 				{
-					if(RESPONSE_QUEUE.empty())
-						continue;
-						
-					CBlock cResponse = RESPONSE_QUEUE.front();
-					RESPONSE_QUEUE.pop();
+					printf("[MASTER] Nexus : Block REJECTED\n");
 					
-					printf("[MASTER] Block Rejected by Coinshield Network\n");
+					ResetThreads();
 				}
 					
 				/** Reset the Threads if a New Block came in. **/
@@ -400,7 +371,7 @@ namespace Core
 					if(nHeight > nBestHeight)
 					{
 						nBestHeight = nHeight;
-						printf("[MASTER] Coinshield Network: New Block %u.\n", nBestHeight);
+						printf("[MASTER] Nexus : New Block %u.\n", nBestHeight);
 							
 						ResetThreads();
 					}
@@ -438,7 +409,7 @@ namespace Core
 							/** Set the Difficulty from most recent Block Received. **/
 							nDifficulty = THREADS[nIndex]->cBlock.nBits;
 								
-							printf("[MASTER] Block %s Height = %u Received on Thread %u\n", THREADS[nIndex]->cBlock.GetHash().ToString().substr(0, 20).c_str(), THREADS[nIndex]->cBlock.nHeight, nIndex);
+							printf("[MASTER] Block %s Height = %u Received on Thread %u\n", THREADS[nIndex]->cBlock.hashMerkleRoot.ToString().substr(0, 20).c_str(), THREADS[nIndex]->cBlock.nHeight, nIndex);
 							THREADS[nIndex]->fBlockWaiting = false;
 								
 							break;

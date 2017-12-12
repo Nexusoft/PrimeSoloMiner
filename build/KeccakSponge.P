@@ -1,0 +1,4 @@
+build/KeccakSponge.o: hash/KeccakSponge.c hash/KeccakSponge.h \
+ hash/KeccakF-1600-interface.h
+hash/KeccakSponge.c hash/KeccakSponge.h :
+ hash/KeccakF-1600-interface.h :
