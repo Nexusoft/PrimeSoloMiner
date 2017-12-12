@@ -1,4 +1,0 @@
-build/KeccakDuplex.o: hash/KeccakDuplex.c hash/KeccakDuplex.h \
- hash/KeccakF-1600-interface.h
-hash/KeccakDuplex.c hash/KeccakDuplex.h :
- hash/KeccakF-1600-interface.h :
